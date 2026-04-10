@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🎮 你是哪个游戏角色？</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Noto+Serif+SC:wght@400;700&display=swap');
+:root{--pri:#6C5CE7;--pri-l:#A29BFE;--acc:#FD79A8;--acc2:#FDCB6E;--bg:#0C0818;--card:#16112A;--txt:#F5F5F7;--txt2:#9090A8;--txt3:#6a6a80;--g1:linear-gradient(135deg,#6C5CE7,#A29BFE);--g2:linear-gradient(135deg,#FD79A8,#FDCB6E);--sh:0 8px 32px rgba(108,92,231,.3)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans SC',-apple-system,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.star{position:absolute;border-radius:50%;background:#fff;animation:tw ease-in-out infinite alternate}
+@keyframes tw{0%{opacity:.06;transform:scale(.7)}100%{opacity:.5;transform:scale(1.3)}}
+
+.wrap{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:20px 16px;min-height:100vh;display:flex;flex-direction:column}
+.scr{display:none;flex-direction:column;flex:1}.scr.on{display:flex}
+
+.s-start{align-items:center;justify-content:center;text-align:center;animation:fu .8s}
+.hero{font-size:40px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+.hero span{animation:hf 3s ease-in-out infinite}
+.hero span:nth-child(2n){animation-delay:.35s}.hero span:nth-child(3n){animation-delay:.7s}
+@keyframes hf{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.s-start h1{font-size:28px;font-weight:900;background:var(--g2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px;line-height:1.4}
+.s-start .sub{color:var(--txt2);font-size:14px;margin-bottom:20px;line-height:1.8}
+.s-start .flavor{color:var(--txt3);font-size:12px;font-style:italic;margin-bottom:24px;line-height:1.7;max-width:400px;font-family:'Noto Serif SC',serif}
+.gtags{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:24px}
+.gtags span{background:rgba(108,92,231,.1);border:1px solid rgba(108,92,231,.2);border-radius:20px;padding:4px 11px;font-size:11px;color:var(--pri-l)}
+.mrow{display:flex;gap:18px;margin-bottom:28px;color:var(--txt2);font-size:12px}.mrow span{display:flex;align-items:center;gap:4px}
+.btn{border:none;color:#fff;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.btn-go{background:var(--g1);font-size:17px;padding:15px 48px;border-radius:50px;box-shadow:var(--sh)}
+.btn-go:hover{transform:translateY(-2px)}.btn-go:active{transform:scale(.97)}
+
+.pbar{width:100%;height:4px;background:rgba(255,255,255,.04);border-radius:2px;margin-bottom:14px;overflow:hidden}
+.pfill{height:100%;border-radius:2px;background:var(--g1);transition:width .5s cubic-bezier(.4,0,.2,1)}
+.ptxt{text-align:center;font-size:11px;color:var(--txt3);margin-bottom:12px}
+
+.scene{background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:14px;border-left:3px solid var(--pri);animation:fu .4s}
+.scene-from{font-size:11px;color:var(--acc);margin-bottom:5px;font-weight:500}
+.scene-desc{font-size:13px;color:var(--txt2);line-height:1.7;font-family:'Noto Serif SC',serif;font-style:italic}
+
+.badge{display:inline-flex;align-items:center;gap:5px;background:rgba(108,92,231,.1);border:1px solid rgba(108,92,231,.2);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--pri-l);margin-bottom:8px;align-self:flex-start}
+.badge.egg{background:rgba(253,121,168,.1);border-color:rgba(253,121,168,.25);color:var(--acc)}
+
+.qtxt{font-size:17px;font-weight:700;line-height:1.65;margin-bottom:8px;animation:fu .4s}
+.narrator{font-size:12px;color:var(--txt3);line-height:1.6;margin-bottom:18px;font-family:'Noto Serif SC',serif;font-style:italic;padding-left:12px;border-left:2px solid rgba(108,92,231,.2);animation:fu .45s}
+
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{background:var(--card);border:2px solid rgba(255,255,255,.04);border-radius:14px;padding:14px 16px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;animation:fu .4s}
+.opt:nth-child(2){animation-delay:.04s}.opt:nth-child(3){animation-delay:.08s}.opt:nth-child(4){animation-delay:.12s}
+.opt::before{content:'';position:absolute;inset:0;opacity:0;background:var(--g1);transition:opacity .22s}
+.opt:hover{border-color:var(--pri);transform:translateX(3px)}.opt:hover::before{opacity:.06}
+.opt:active{transform:scale(.98)}
+.opt.sel{border-color:var(--pri);background:rgba(108,92,231,.1)}.opt.sel::before{opacity:.08}
+.oi{position:relative;z-index:1}
+.opt-head{display:flex;align-items:flex-start;margin-bottom:4px}
+.ol{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;background:rgba(108,92,231,.15);color:var(--pri-l);font-weight:700;font-size:11px;margin-right:10px;flex-shrink:0;margin-top:1px}
+.opt-title{flex:1;font-size:14px;line-height:1.5;font-weight:600}
+.opt-flavor{font-size:12px;color:var(--txt3);line-height:1.55;margin-left:34px;font-family:'Noto Serif SC',serif;font-style:italic}
+
+.skill-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;margin-left:6px;font-weight:500;font-style:normal;vertical-align:middle}
+.skill-tag.red{background:rgba(253,121,168,.15);color:#fd9ab8}
+.skill-tag.blue{background:rgba(108,92,231,.15);color:var(--pri-l)}
+.skill-tag.green{background:rgba(0,206,201,.15);color:#55efc4}
+.skill-tag.gold{background:rgba(253,203,110,.15);color:#ffeaa7}
+
+.s-result{align-items:center;text-align:center;padding-top:12px}
+.ri{font-size:76px;margin-bottom:8px;animation:bi .7s}
+@keyframes bi{0%{transform:scale(0)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+.rf{font-size:12px;color:var(--txt2);margin-bottom:2px}
+.rn{font-size:28px;font-weight:900;background:var(--g2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:3px}
+.rt{font-size:13px;color:var(--pri-l);margin-bottom:14px;letter-spacing:1px}
+.rd{color:var(--txt2);font-size:14px;line-height:1.8;margin-bottom:18px;max-width:440px;text-align:left}
+
+.rdims{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+.rdim{background:var(--card);border-radius:12px;padding:11px;text-align:left}
+.rdim .dl{font-size:10px;color:var(--txt3);margin-bottom:4px}.rdim .db{width:100%;height:4px;background:rgba(255,255,255,.04);border-radius:2px;margin-bottom:5px;overflow:hidden}
+.rdim .df{height:100%;border-radius:2px;transition:width 1s}.rdim .dr{font-size:14px;font-weight:700}
+
+.egg-box{background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:18px;max-width:440px;width:100%;text-align:left;border:1px solid rgba(253,121,168,.18)}
+.egg-box .et{font-size:12px;color:var(--acc);font-weight:700;margin-bottom:5px}.egg-box .eb{font-size:13px;color:var(--txt2);line-height:1.7}
+
+.rq{background:var(--card);border-radius:12px;padding:13px 16px;margin-bottom:22px;max-width:440px;width:100%;font-style:italic;color:var(--txt3);font-size:13px;line-height:1.7;border-left:3px solid var(--pri);font-family:'Noto Serif SC',serif;text-align:left}
+
+.rtags{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin-bottom:22px}
+.rtags span{background:rgba(108,92,231,.08);border:1px solid rgba(108,92,231,.15);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--pri-l)}
+
+.bgrp{display:flex;gap:10px;width:100%;max-width:400px}
+.ba{flex:1;padding:12px 16px;border-radius:50px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .2s}
+.ba.p{background:var(--g1);color:#fff;box-shadow:var(--sh)}.ba.s{background:rgba(255,255,255,.04);color:var(--txt);border:1px solid rgba(255,255,255,.08)}
+.ba:hover{transform:translateY(-2px)}.ba:active{transform:scale(.97)}
+
+.toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(108,92,231,.95);color:#fff;padding:10px 24px;border-radius:50px;font-size:13px;z-index:100;opacity:0;transition:opacity .3s;pointer-events:none}.toast.show{opacity:1}
+
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:375px){.s-start h1{font-size:22px}.qtxt{font-size:15px}.rn{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="wrap">
+
+<div class="scr s-start on" id="S0">
+  <div class="hero"><span>🐒</span><span>🗡️</span><span>🍄</span><span>🧙</span><span>🕳️</span><span>🐺</span><span>🃏</span><span>🌀</span></div>
+  <h1>你是哪个<br>经典游戏角色？</h1>
+  <p class="sub">18道沉浸式游戏名场面 + 2道隐藏彩蛋<br>找到你的灵魂角色</p>
+  <p class="flavor">「你脑中某个声音低语：这不只是一个测试。<br>它是一面镜子——映出你在每个分叉路口的真实选择。<br>准备好了吗？选项不会等你。」</p>
+  <div class="gtags">
+    <span>黑神话：悟空</span><span>塞尔达传说</span><span>只狼</span><span>巫师3</span>
+    <span>极乐迪斯科</span><span>空洞骑士</span><span>最终幻想</span><span>合金装备</span>
+    <span>女神异闻录5</span><span>尼尔：机械纪元</span><span>艾尔登法环</span><span>杀戮尖塔</span>
+  </div>
+  <div class="mrow"><span>🕐 约5分钟</span><span>📋 18+2题</span><span>🎮 16种角色</span></div>
+  <button class="btn btn-go" id="btn-go">踏入测试 →</button>
+</div>
+
+<div class="scr" id="S1">
+  <div class="pbar"><div class="pfill" id="pF"></div></div>
+  <div class="ptxt" id="pT"></div>
+  <div id="scA"></div>
+  <div class="badge" id="bdg"></div>
+  <div class="qtxt" id="qT"></div>
+  <div class="narrator" id="nrr"></div>
+  <div class="opts" id="opC"></div>
+</div>
+
+<div class="scr s-result" id="S2">
+  <div class="ri" id="rI"></div>
+  <div class="rf" id="rF"></div>
+  <div class="rn" id="rN"></div>
+  <div class="rt" id="rT"></div>
+  <div class="rd" id="rD"></div>
+  <div class="rdims" id="rDm"></div>
+  <div id="eA"></div>
+  <div class="rq" id="rQ"></div>
+  <div class="rtags" id="rTg"></div>
+  <div class="bgrp">
+    <button class="ba s" id="btn-restart">重新测试</button>
+    <button class="ba p" id="btn-share">分享结果 ✨</button>
+  </div>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+const Qs=[
+{dim:'EI',badge:'⚡ 社交能量',
+ scene:{from:'《黑神话：悟空》第一章 · 黑风洞',desc:'妖气从洞口涌出，像是大地在喘息。你握紧了如意金箍棒——前方的黑暗中，传来了其他冒险者的脚步声和低沉的对话。'},
+ q:'此刻你会怎么做？',
+ narrator:'「共情」在你胸腔里发出微弱的声响。或许它想让你走过去。又或许——「谨慎」才是对的，你应该先搞清楚他们是谁。',
+ opts:[
+  {t:'循声走去，主动亮出武器表示友善',f:'"独行的猴子是悲伤的猴子。" 你心中的某个角落如此低语。战斗的伙伴在此刻胜过一百件仙器。',s:{E:2},tag:'共情',tc:'red'},
+  {t:'咳嗽一声暴露位置，让他们来找你',f:'不主动出击，但也不拒绝接触——你的「策略」认为：让对方主动，你才掌握信息差。',s:{E:1},tag:'策略',tc:'blue'},
+  {t:'在暗处驻足片刻，观察他们的实力和意图',f:'「电子学」嗡嗡作响：他们的武器等级、行走的队形、交谈的语气——这些数据比直觉更可靠。',s:{I:1},tag:'电子学',tc:'green'},
+  {t:'绕开这条路，从另一个裂缝钻进洞穴深处',f:'你听见自己的呼吸声。很好。这才是你唯一需要的同行者。棍棒入手，妖风拂面——你已经踏上了只属于你的路。',s:{I:2},tag:'内心要塞',tc:'gold'}
+]},
+{dim:'EI',badge:'⚡ 社交能量',
+ scene:{from:'《最终幻想XIV》利姆萨·罗敏萨',desc:'你第一次踏入主城。海风灌入敞开的城门，广场上到处是跳舞的玩家、巨型坐骑和刷屏的世界频道。阳光太刺眼了。'},
+ q:'主城的第一个小时，你会怎么度过？',
+ narrator:'「感官」将这一切碾碎后塞进你的大脑：音乐、色彩、无数陌生的名字。你需要做出选择——向外扩展，还是向内收缩？',
+ opts:[
+  {t:'加入广场上正在跳舞的人群，管他们是谁——身体比大脑先动了',f:'你的髋关节开始响应四四拍。「体魄」毫无征兆地接管了你的神经系统。当第七个人对你使用/拍手时，你知道你属于这里。',s:{E:2},tag:'体魄',tc:'red'},
+  {t:'打开招募板，随机申请一个正在做新手引导的队伍',f:'「建议」低声说：最快融入一个世界的方法，是找到你在其中的功能性角色。于是你加入了某个需要奶妈的小队。',s:{E:1},tag:'建议',tc:'blue'},
+  {t:'走进图书馆，把能找到的世界设定文本全部读一遍',f:'「百科全书」震颤着苏醒了。你需要理解这个世界的规则——而规则，只藏在别人不愿阅读的地方。',s:{I:1},tag:'百科全书',tc:'green'},
+  {t:'爬上城墙最高处，坐下来看落日和远方的海面',f:'「内心要塞」打开一扇小窗。晚风涌入。你不需要理解这个世界，你只需要——感受它。这就够了。',s:{I:2},tag:'内心要塞',tc:'gold'}
+]},
+{dim:'EI',badge:'⚡ 社交能量',
+ scene:{from:'《怪物猎人：世界》集会所',desc:'你在集会所匹配到三个陌生猎人。他们正在调试装备，无人说话。营地的篝火发出细微的噼啪声。历战古龙的任务倒计时已经开始。'},
+ q:'出发前最后三十秒——',
+ narrator:'寂静拉长了时间。你注意到3号猎人的武器选择非常离谱，2号带了一个明显不对的护石。你是否要打破沉默？',
+ opts:[
+  {t:'"等一下！我来分配一下走位——"你打开了语音',f:'「权威」从沉默中站起来，像一把被拔出鞘的刀。有人需要说话。而你发现——那个人从来都是你。',s:{E:2},tag:'权威',tc:'red'},
+  {t:'发一串预设的快捷消息和攻略截图',f:'「修辞学」在键盘上翩翩起舞。你没有开麦，但用极精准的图文完成了比语音更高效的沟通。',s:{E:1},tag:'修辞学',tc:'blue'},
+  {t:'默默切换了自己的配装来弥补队伍短板',f:'你什么都没说，但把输出套换成了辅助套。「逻辑」告诉你：行动永远比语言更有效率。改变你能改变的。',s:{I:1},tag:'逻辑',tc:'green'},
+  {t:'什么也不做——各凭本事，打不过再说',f:'你的「冷漠」平静得像一面湖。别人的装备不是你的问题。你只需要确保自己的刀足够快、闪避足够准。',s:{I:2},tag:'冷漠',tc:'gold'}
+]},
+{dim:'EI',badge:'⚡ 社交能量',
+ scene:{from:'《动物森友会》你的小岛',desc:'你花了四个月。每一块石头的位置、每一棵树的品种、每一盏路灯的角度——全部是你一个人决定的。今天，你的五星小岛终于完工了。'},
+ q:'面对这件杰作，你想做什么？',
+ narrator:'「自尊」在你心中膨胀成一颗小太阳。这座岛是你的神殿。问题是——神殿是用来朝拜的，还是用来独享的？',
+ opts:[
+  {t:'立刻开放梦境门牌号，在社交平台写一篇万字建岛攻略',f:'「声望」需要观众。它不是虚荣——它是一种古老的冲动：创造了美的人，有责任让美被看见。你按下了"发布"。',s:{E:2},tag:'声望',tc:'red'},
+  {t:'邀请三五好友上岛，开一场烟花派对',f:'「共情」温柔地提醒你：杰作不需要全世界的掌声。但在乎你的人的眼中那一闪光——那就够了。',s:{E:1},tag:'共情',tc:'blue'},
+  {t:'在自己岛上逛一圈，给每个角落拍下满意的截图存档',f:'「视觉计算」逐帧审视你的作品。光影、构图、色彩配比——你不需要别人的评价。你的眼睛就是最苛刻的评委。',s:{I:1},tag:'视觉计算',tc:'green'},
+  {t:'关掉Nintendo Switch，闭上眼睛——脑海里的那座岛比屏幕上的更完美',f:'「概念化」在你的意识中打开了一扇门。完成本身就是奖赏。真正的岛屿不在屏幕上，而在你闭眼之后仍能看见的地方。',s:{I:2},tag:'概念化',tc:'gold'}
+]},
+{dim:'SN',badge:'🔍 探索方式',
+ scene:{from:'《塞尔达传说：旷野之息》初始台地',desc:'你从百年沉眠中醒来。石门缓缓推开——整个海拉鲁在你眼前展开。远处的高塔在召唤，火山在冒烟，城堡被黑暗笼罩。而你连一把像样的武器都没有。'},
+ q:'你的第一步朝向哪里？',
+ narrator:'风很大。你的「感知」和「直觉」同时在呐喊——一个说"先确认脚下"，另一个说"先望向远方"。它们第一次意见不合。',
+ opts:[
+  {t:'打开石板地图，标记最近的三个神庙，按路径最短的顺序出发',f:'「视觉计算」已经完成了路径优化。效率是你的第一信仰——在一个陌生世界里，确定性就是你的武器。',s:{S:2},tag:'视觉计算',tc:'green'},
+  {t:'先把身边能捡的东西全捡了——树枝、苹果、石头，什么都行',f:'「半光」低语：在未知世界里活下来的第一法则，是囤积一切看得见的资源。你的口袋鼓了起来。好的开始。',s:{S:1},tag:'半光',tc:'blue'},
+  {t:'看到那座被黑暗笼罩的城堡了吗？直接朝它跑过去',f:'「狂飙精神」一脚踹开了你的理性大门。那座城堡显然不属于现在的你——但"不属于"三个字本身就是一种邀请。',s:{N:1},tag:'狂飙精神',tc:'red'},
+  {t:'不看地图。背对高塔，朝相反的方向走——去找那些不在任何标记上的东西',f:'「灵感」在你的脊椎上弹奏了一个不和谐的和弦。真正的发现不在地图上。地图之外，才是你的目的地。',s:{N:2},tag:'灵感',tc:'gold'}
+]},
+{dim:'SN',badge:'🔍 探索方式',
+ scene:{from:'《只狼：影逝二度》苇名城本丸',desc:'你第一次走上这座桥。桥的另一端，骑在战马上的鬼刑部举起了长枪。马蹄声震动大地，你的义手微微发麻。这是你见过的最大的敌人。'},
+ q:'面对这个从未见过的巨型Boss——',
+ narrator:'「疼痛阈值」预感到了即将到来的死亡。也许不只一次。你需要决定——是用理性拆解它，还是用身体去记住它？',
+ opts:[
+  {t:'先不动。用三十秒观察它的攻击模式：挥砍节奏、间隔、可弹反窗口',f:'「逻辑」戴上了它的手术手套。每一个Boss都是一道方程式——你只需要找到等号右边的那个解。',s:{S:2},tag:'逻辑',tc:'green'},
+  {t:'打开菜单翻翻忍义手说明书，也许有针对马的特殊道具',f:'「百科全书」翻开了它尘封的扉页。在这个世界里，信息就是暗器——你习惯在出手前先读完说明书的小字。',s:{S:1},tag:'百科全书',tc:'blue'},
+  {t:'直接冲上去弹反第一刀——身体会比大脑更快记住正确的节奏',f:'「电化学」在你的突触间以光速传导。痛觉是最好的教科书。死亡？那不过是另一种形式的预习。',s:{N:1},tag:'电化学',tc:'red'},
+  {t:'先不打。绕到桥下面看看——也许有另一条路，或者一个能把马引到悬崖边的方法',f:'「灵感」在你耳边说了一句疯话："如果正面打不过——那就不要正面打。" 你开始用不属于武士的方式思考。',s:{N:2},tag:'灵感',tc:'gold'}
+]},
+{dim:'SN',badge:'🔍 探索方式',
+ scene:{from:'《艾尔登法环》宁姆格福',desc:'黄金树的光芒照亮了整片平原。你面前有两条路——近处是一个发光的地牢入口，远处的地平线上有一个你从未见过的巨大阴影在缓慢移动。'},
+ q:'你朝哪个方向迈出脚步？',
+ narrator:'「意志力」和「好奇心」正在你的颅腔内进行一场安静的拔河。一个拽你往近处，一个拽你往远方。绳子越来越紧。',
+ opts:[
+  {t:'近处的地牢。把已知的收益拿到手，再考虑远方的未知',f:'「意志力」赢了这轮拔河。你优先处理确定性最高的事项——因为在一个充满意外的世界里，"稳" 本身就是一种勇敢。',s:{S:2},tag:'意志力',tc:'green'},
+  {t:'先打开地图，确认一下这附近还有哪些没去过的点，规划出最优路线',f:'「百科全书」摊开了一张心理地图。你在上面画满了箭头和标注——没有计划的探索不叫冒险，叫迷路。',s:{S:1},tag:'百科全书',tc:'blue'},
+  {t:'远处那个巨大的阴影——它在动。你必须知道那是什么',f:'「好奇心」挣脱了绳索，拔腿就跑。你追了上去。理性在身后大喊"回来"——但你已经听不见了。',s:{N:1},tag:'好奇心',tc:'red'},
+  {t:'两个都不去。你注意到路边有一处几乎看不见的裂缝——也许通向某个隐藏区域',f:'「灵感」微微一笑。真正的宝藏不在显眼的入口里，也不在远方的阴影中——它在你脚边那条所有人都忽略的裂缝里。',s:{N:2},tag:'灵感',tc:'gold'}
+]},
+{dim:'SN',badge:'🔍 探索方式',
+ scene:{from:'《原神》须弥 · 大梦知花',desc:'你面前是一组复杂的光柱解谜机关。六根光柱需要旋转至正确角度才能打开石门。地上有模糊的线索符文，但似乎缺了一部分。'},
+ q:'你开始如何破解这个谜题？',
+ narrator:'「逻辑」和「灵感」同时举起了手。一个想让你计算角度，另一个想让你"感觉一下"。你大脑的两个半球第一次公开决裂。',
+ opts:[
+  {t:'测量每根光柱的当前角度，推算对称关系和数学规律',f:'「逻辑」展开了一张完美的坐标纸。六个变量，若干约束条件——它只需要足够的数据就能找到唯一解。',s:{S:2},tag:'逻辑',tc:'green'},
+  {t:'先读完地上所有符文线索，一个一个排除法试过去',f:'「感知」蹲下来用手指描摹地上的每一道线条。没有捷径——但穷举本身就是最可靠的通往答案的路。',s:{S:1},tag:'感知',tc:'blue'},
+  {t:'凭直觉先转几根，万一歪打正着呢——而且能排除错误选项',f:'「电化学」说："与其在脑中模拟一百次，不如用手试一次。" 你握住了第一根光柱。直觉引导着你的指尖。',s:{N:1},tag:'电化学',tc:'red'},
+  {t:'先不解谜。在周围走一圈——也许有完全不同的打开石门的方法',f:'「灵感」拍了拍你的肩膀："谁说石门一定要用光柱打开？" 你抬起头，开始用全新的眼光审视这个房间。',s:{N:2},tag:'灵感',tc:'gold'}
+]},
+{dim:'TF',badge:'⚖️ 决策逻辑',
+ scene:{from:'《巫师3》威伦 · 血腥男爵线',desc:'你追查到了男爵的妻女下落。面前有两条路——一条能拯救更多无辜的人但需要释放一个被囚禁的远古邪灵；另一条只能救一部分人，但不需要任何人为此付出代价。灰烬从天空飘落。'},
+ q:'猎魔人，你怎么选？',
+ narrator:'「意志力」和「共情」在你的胸腔里进行了一场无声的审判。没有法官、没有陪审团——只有你自己。而两条路的尽头都有人在等。',
+ opts:[
+  {t:'释放邪灵，救更多人。功利计算的结果是清晰的——数字不说谎',f:'「意志力」合上了那本名为"道德"的书。在一个灰色的世界里，净收益最大化就是最接近"正确"的答案。代价？已经被计入了公式。',s:{T:2},tag:'意志力',tc:'green'},
+  {t:'不释放，但研究能否削弱邪灵后再利用它——寻找风险更低的第三方案',f:'「逻辑」拒绝了二选一的框架。它在两个极端之间画出了一条窄路——也许这条路不存在，但不试一下你不会罢休。',s:{T:1},tag:'逻辑',tc:'blue'},
+  {t:'不释放邪灵。哪怕救的人更少——我不愿用"释放恶魔"来定义自己的正义',f:'「共情」轻轻握住了你的剑手。"你是一个猎魔人，不是一个计算器。有些底线，跨过去了就再也回不来。"',s:{F:1},tag:'共情',tc:'red'},
+  {t:'去问那些被困的人他们自己想怎么做——这不该由你一个人决定',f:'「内心要塞」打开了最里层的门。"你以什么资格替别人决定生死？" 这个问题比任何邪灵都更难驱散。你决定先听听当事人的声音。',s:{F:2},tag:'内心要塞',tc:'gold'}
+]},
+{dim:'TF',badge:'⚖️ 决策逻辑',
+ scene:{from:'《最终幻想VII》忘却之都',desc:'艾瑞丝跪在祭坛上祈祷。光柱从天而降。然后——塞菲罗斯的长刀从她身后贯穿了一切。她的眼睛还睁着。魔石从她发间滚落，叮的一声落入水中。一切都安静了。'},
+ q:'如果你是克劳德，此刻你会——',
+ narrator:'「电化学」将你的愤怒浓度提升到了危险水平。同时，「共情」正在你的胸腔里碎裂成一千块。你需要在这两股力量撕碎你之前做出决定。',
+ opts:[
+  {t:'压下一切情绪。站起来，分析塞菲罗斯的行动模式——他还会回来，你必须做好准备',f:'「冷血」不是残忍——它是一种生存机制。你把悲伤锁进了某个你暂时不打算打开的抽屉。此刻只有一个问题重要：下一步怎么打。',s:{T:2},tag:'冷血',tc:'green'},
+  {t:'重新编队。把最脆弱的队友调到后排，确保悲剧不再重演',f:'「逻辑」没有时间悲伤。它在用颤抖的手重新排列阵型——因为"防止更多死亡"比"哀悼一次死亡"有更高的优先级。',s:{T:1},tag:'逻辑',tc:'blue'},
+  {t:'把她抱到湖边。不管接下来发生什么，先好好送她最后一程',f:'「共情」接管了你的身体。双手在颤抖，但动作异常温柔。这个世界可以等——但告别不能敷衍。',s:{F:1},tag:'共情',tc:'red'},
+  {t:'握紧剑站起来——不是为了战术，纯粹是因为愤怒。"塞菲罗斯，我发誓——"',f:'「电化学」的洪水冲破了理性的堤坝。这不是计算后的决定，而是从灵魂最深处涌出的本能：有人伤害了她，那个人必须付出代价。',s:{F:2},tag:'电化学',tc:'gold'}
+]},
+{dim:'TF',badge:'⚖️ 决策逻辑',
+ scene:{from:'《底特律：变人》哈特广场',desc:'你是仿生人领袖马库斯。你的同胞正在街头被人类射杀——蓝色的血液在雪地上蔓延。电视台的摄像头对准了你。整个世界都在看。'},
+ q:'你举起手来，然后——',
+ narrator:'「修辞学」和「体魄」各握住了你的一只手。一只想让你用嘴说话，另一只想让你用拳头说话。摄像头的红灯在闪。',
+ opts:[
+  {t:'"以暴制暴——数据显示，历史上只有武力能改变权力结构"',f:'「百科全书」翻到了第347页：每一次成功的解放运动，背后都有一个不再忍耐的时刻。你决定这就是那个时刻。',s:{T:2},tag:'百科全书',tc:'green'},
+  {t:'占领电视台，用信息战赢得舆论——让全世界看见真相',f:'「修辞学」微笑了。真正的战场不在街头，而在屏幕里。用正确的话、在正确的时刻、说给正确的人听——这比子弹更锋利。',s:{T:1},tag:'修辞学',tc:'blue'},
+  {t:'和平游行。手牵手，唱歌，即使对面是枪口——用爱和牺牲唤醒良知',f:'「共情」在你的胸腔里亮了起来，像一团无法熄灭的火。它说：憎恨永远不可能让世界变好。只有让那些开枪的人看到你的眼睛——他们才会放下武器。',s:{F:1},tag:'共情',tc:'red'},
+  {t:'"所有人撤退。一个同胞都不能再少了——活着，才有资格谈明天"',f:'「内心要塞」以不容拒绝的声音说：再伟大的主义也不值得用具体的生命去交换。你下令撤退——这不是怯懦，这是对每一条命的尊重。',s:{F:2},tag:'内心要塞',tc:'gold'}
+]},
+{dim:'TF',badge:'⚖️ 决策逻辑',
+ scene:{from:'《尼尔：机械纪元》E结局',desc:'屏幕上只剩下一行文字：「你是否愿意删除你的全部存档，来帮助一个素未谋面的陌生玩家通关最终关卡？」光标在"是"和"否"之间闪烁。'},
+ q:'你的指尖悬停在按键上方——',
+ narrator:'「意志力」在冷静地核算沉没成本。「共情」在轻声说："你当初不也是被别人帮助才走到这里的吗？" 时间在这一秒停止了。',
+ opts:[
+  {t:'选"否"。一百多小时的存档不可能为一个抽象的善意牺牲——这是理性的底线',f:'「意志力」平静地关闭了那个窗口。这不是冷漠。这是一个成年人在「情感勒索」面前保持清醒的能力。你的记忆值得被保护。',s:{T:2},tag:'意志力',tc:'green'},
+  {t:'犹豫了很久，最终选"否"——但在论坛上写了一篇详细的通关攻略',f:'「逻辑」找到了一条不需要自我牺牲的利他路径。删档只能帮一个人；攻略可以帮一万个人。效率，永远是你的答案。',s:{T:1},tag:'逻辑',tc:'blue'},
+  {t:'犹豫了很久，含泪选了"是"——把这份温暖传递给下一个人',f:'「共情」按下了你的手指。屏幕上，你的名字一个字一个字地消失了。你在流泪——但那不是痛苦。是一种你很少感受到的、纯粹的圆满。',s:{F:1},tag:'共情',tc:'red'},
+  {t:'毫不犹豫选"是"——如果我的牺牲能让另一个灵魂不再孤独，这就是存档最好的归宿',f:'「灵感」用你听不见的频率说了一句话。你不知道它说了什么——但你的手已经按下去了。存档化为光点消散。你笑了。',s:{F:2},tag:'灵感',tc:'gold'}
+]},
+{dim:'JP',badge:'🎯 行动节奏',
+ scene:{from:'《塞尔达传说：王国之泪》天空岛',desc:'你从天空岛降落。脚下是整片海拉鲁大陆——主线的箭头在闪、神庙的光在招手、左纳乌遗迹在嗡嗡作响、不远处有一匹野马在吃草。所有东西都在同时对你说"来这里"。'},
+ q:'你会如何规划你的旅程？',
+ narrator:'「意志力」展开了一张空白的计划表。「灵感」一把将它揉成纸团扔出了窗外。它们又吵起来了。',
+ opts:[
+  {t:'按区域划分路线，每个区域做完全部神庙和支线再走下一个',f:'「意志力」用尺子在地图上画出了完美的网格线。每一格都有编号、优先级、预计完成时间。混乱是你最大的敌人——而你从不输给它。',s:{J:2},tag:'意志力',tc:'green'},
+  {t:'写个大致的优先级清单：先推主线到节点 → 攒装备 → 再探索',f:'「逻辑」给出了一个框架但留有弹性。计划是骨架，临时调整是血肉——你两样都需要。',s:{J:1},tag:'逻辑',tc:'blue'},
+  {t:'大方向跟主线走，但路上看到有意思的东西就停下来折腾半天',f:'「好奇心」像一只小狗一样跑来跑去拽你的裤腿。你本来打算去神庙——结果在路上花了两个小时拼了一台左纳乌飞机。',s:{P:1},tag:'好奇心',tc:'red'},
+  {t:'完全不管主线。看到野马先抓马，看到温泉先泡澡，看到山先爬山',f:'「灵感」撕碎了所有计划书。"旅程的意义不在终点。你的下一步，应该由风来决定。" 于是你跟着风跑了。',s:{P:2},tag:'灵感',tc:'gold'}
+]},
+{dim:'JP',badge:'🎯 行动节奏',
+ scene:{from:'《原神/崩铁》限时活动倒计时',desc:'你打开手机——限时活动还剩24小时。你看了一眼进度条：38%。奖池里还有一把限定武器和十连抽。屏幕右上角的倒计时数字在跳动。'},
+ q:'为什么会这样？以及——你现在打算怎么办？',
+ narrator:'「半光」在你的理性角落冷冷说："你本可以避免这一切。" 「体魄」回应道："但我们现在聊这个有什么用？冲就完了。"',
+ opts:[
+  {t:'不可能。我第一天就做好了每日进度表——奖励三天前就领完了',f:'「意志力」抬起了骄傲的头。它的计划从来不出差错。倒计时？那是留给别人紧张的东西。你此刻正在泡茶。',s:{J:2},tag:'意志力',tc:'green'},
+  {t:'有点拖了，但不慌。打开攻略找到最高效的速通路线开始清任务',f:'「逻辑」打开了它的应急预案。虽然不是最优情况，但每一秒都分配给了最高性价比的行动。你开始以三倍速运转。',s:{J:1},tag:'逻辑',tc:'blue'},
+  {t:'确实摸鱼了——但Deadline才是真正的动力。泡杯咖啡，通宵肝！',f:'「电化学」在你的血管里注入了纯度99%的肾上腺素。你的效率在最后24小时达到了全周期的峰值。某种意义上，这才是你的最佳状态。',s:{P:1},tag:'电化学',tc:'red'},
+  {t:'看了一眼奖励——也没那么非要不可。关掉手机去散步了',f:'「冷漠」优雅地将那些奖励从你的欲望清单上划掉。不为FOMO所动——这才是真正的自由。限时？限谁呢。',s:{P:2},tag:'冷漠',tc:'gold'}
+]},
+{dim:'JP',badge:'🎯 行动节奏',
+ scene:{from:'《星露谷物语》鹈鹕镇 · 春天第一日',desc:'你继承了爷爷的农场。面前是一片长满杂草的荒地、一袋种子、一把锄头，以及一封"做你想做的事"的遗书。镇上的人在远处的集市上笑闹着。'},
+ q:'你将如何经营这座属于你的农场？',
+ narrator:'爷爷的信上只写了一句话："赚钱不是目的。但别把田荒了。" 「逻辑」和「灵感」对这句话有截然不同的理解。',
+ opts:[
+  {t:'查好每个季节的最优作物表和赚钱路线，严格执行种植计划',f:'「百科全书」已经打开了利润率最优解Wiki页面。每一格土地都被分配了最优种子，每一天都有精确到小时的日程。这不是农场——这是一台精密机器。',s:{J:2},tag:'百科全书',tc:'green'},
+  {t:'大致按攻略节奏来，但留出时间钓钓鱼、送送礼',f:'「建议」提出了一个折中方案：先确保财务健康，再追求生活品质。你种了八格土豆，然后去找镇上的医生聊天了。',s:{J:1},tag:'建议',tc:'blue'},
+  {t:'今天想种田就种田，想钓鱼就钓鱼，想去矿洞就去矿洞',f:'「灵感」把那份种植计划折成了纸飞机。"你爷爷说\'做你想做的事\'——他可没说做一个利润最大化的资本家。"',s:{P:1},tag:'灵感',tc:'red'},
+  {t:'种了一排花就跑去谈恋爱了。作物枯死了？没关系，明年再说',f:'「共情」把你引向了镇上那个住在海边的害羞女孩。你发现比起种地，你更想种下一段关系。利润是什么？不重要。',s:{P:2},tag:'共情',tc:'gold'}
+]},
+{dim:'JP',badge:'🎯 行动节奏',
+ scene:{from:'所有RPG · 背包整理时间',desc:'你打开了你的游戏背包。347个物品。其中有12把你不确定还有没有用的旧武器、43个不知道是什么的材料、以及一封你三个月前就该读的NPC来信。'},
+ q:'你的背包此刻长什么样？',
+ narrator:'「视觉计算」试图给这片混沌建立秩序。「冷漠」则认为，混沌本身就是一种秩序——只是你还没学会欣赏它。',
+ opts:[
+  {t:'不可能乱。我每次副本结束都会按类型排列、标记和丢弃过时装备',f:'「意志力」管理你的背包就像管理一个精密的档案室。每个物品都有编号，每个格子都有归属。混乱？不存在于你的字典里。',s:{J:2},tag:'意志力',tc:'green'},
+  {t:'有点乱，但我会每周花十分钟清理一次，保持大致整洁',f:'「建议」提出了一个可持续的方案：不追求完美，但保持"可工作"的状态。你打开背包，花了八分钟删掉了50个物品。够了。',s:{J:1},tag:'建议',tc:'blue'},
+  {t:'乱。但我有搜索功能啊——需要什么直接搜，比手动翻快多了',f:'「电化学」说："整理背包的时间可以用来打三个副本。" 你的手指已经在搜索栏里飞速输入了你需要的东西。效率不需要秩序。',s:{P:1},tag:'电化学',tc:'red'},
+  {t:'一片混沌，而且——我在里面发现了三个月前忘记用的超强buff药水',f:'「半光」在背包最深处翻到了一颗布满灰尘的传奇宝石。"你看，" 它说，"混乱不是bug，是feature。"',s:{P:2},tag:'半光',tc:'gold'}
+]},
+{dim:'EGG',badge:'🥚 隐藏彩蛋',isEgg:true,eggId:'destiny',
+ scene:{from:'《黑神话：悟空》终章 · 凌霄宝殿',desc:'你用最后一棍击碎了命运的齿轮。天庭大门在你面前缓缓打开。那道光——温暖、金色、无限——里面有一个为你准备好的王座。也有一条通向人间的石阶。风从两个方向同时吹来。'},
+ q:'天命人，你做出最终的选择——',
+ narrator:'「灵感」沉默了。「逻辑」沉默了。「共情」沉默了。所有声音都退去了。整个宇宙只剩下你的心跳声，以及那扇门后面的光。',
+ opts:[
+  {t:'坐上王座。既然打到了这里——就该承担这份重量',f:'你的脊背挺直了。金箍在你额头上闪烁最后一次光芒，然后碎裂。不是枷锁解开了——而是你终于配得上它。',val:'throne'},
+  {t:'转身走下石阶。自由比任何神位都更珍贵',f:'风从人间吹来，带着泥土和炊烟的气味。你笑了。天上再好——也不如脚踏实地来得踏实。',val:'freedom'},
+  {t:'把金箍棒插在门槛上。力量留给天庭，自由留给自己',f:'棒身在石板上发出嗡鸣，像是在跟你告别。你摸了摸它的顶端，然后头也不回地走了。',val:'balance'},
+  {t:'一棍劈碎王座，再一棍劈碎石阶——"我不选。我要第三条路"',f:'碎片漫天飞舞。天庭在震动。你的声音回荡在云海之间："给我的选项不够好——那就让我自己创造一个。"',val:'rebel'}
+]},
+{dim:'EGG',badge:'🥚 隐藏彩蛋',isEgg:true,eggId:'save',
+ scene:{from:'所有游戏 · 最后的存档点',desc:'发光的存档水晶在你面前悬浮。你的手指碰到它——世界暂停了。所有的记忆像瀑布一样涌来：第一次死亡、第一次通关、第一次被剧情打动、那些陪你战斗过的NPC和真人朋友。最终Boss的门就在前方。'},
+ q:'手指触碰水晶的那一刻，你脑海中浮现的是——',
+ narrator:'时间在这一秒折叠了。你看见了所有的旅途、所有的选择、所有的你。然后——水晶问了你一个问题。',
+ opts:[
+  {t:'"我的配装完美吗？治疗药够吗？要不要回去再刷一套装备？"',f:'「百科全书」最后一次翻开了它的扉页。上面密密麻麻写满了数据、公式和最优解。你微笑着合上了它："准备好了。"',val:'prepare'},
+  {t:'"一路上的那些角色……希望结局对他们好一点"',f:'「共情」在你胸腔里最后亮了一次。它不是为你亮的——是为那些陪你走过来的灵魂。你轻声说了一句只有自己能听见的话。',val:'story'},
+  {t:'"别存了，直接冲——最难的Boss才是最好的Boss！"',f:'「电化学」在你的血管里点燃了最后一根火柴。瞳孔放大。心跳加速。你不是去赴死——你是去赴一场等了整个游戏的约。',val:'charge'},
+  {t:'"不管结局如何——这段旅程本身，就是最好的奖励"',f:'「内心要塞」最后一次为你打开了所有的窗。风涌入，吹散了所有的焦虑和期待。你平静地抬起头："谢谢。我们出发吧。"',val:'journey'}
+]}
+];
+
+const R={
+ESTJ:{icon:'👨‍✈️',name:'Soldier: 76',from:'《守望先锋》',title:'纪律铁拳 · 战场指挥官',desc:'你和士兵76一样，是天生的指挥官。纪律、效率、执行力是你刻在骨子里的信条。团队在你的带领下永远井然有序——不是因为你强势，而是因为你可靠到让所有人都愿意把后背交给你。',tags:['纪律至上','效率输出','团队核心','稳如磐石'],quote:'"我们都是士兵。" —— Soldier: 76'},
+ESTP:{icon:'🐒',name:'天命人·悟空',from:'《黑神话：悟空》',title:'战斗本能 · 天生反骨',desc:'你就是那个天不怕地不怕的齐天大圣。面对再强的Boss也敢直接冲，靠超强的临场反应打出极限操作。规则？不存在的。你就是要打破一切束缚，踏碎凌霄，放肆桀骜。',tags:['战斗天赋','临场反应','不走寻常路','越战越勇'],quote:'"踏碎凌霄，放肆桀骜。" —— 悟空'},
+ESFJ:{icon:'🍄',name:'马里奥',from:'《超级马里奥》',title:'永远可靠 · 全能好人',desc:'你就像马里奥——所有人最可靠的伙伴。不管什么困难你总第一个挺身而出，总是关心每一个队友的状态。你用温暖和行动守护着身边的每一个人，整个蘑菇王国都因你而安心。',tags:['可靠担当','热心助人','永不放弃','团队粘合剂'],quote:'"Here we go!" —— Mario'},
+ESFP:{icon:'🌀',name:'索尼克',from:'《索尼克》',title:'自由疾风 · 快乐旋风',desc:'像索尼克一样，自由和快乐就是你的信仰。你走到哪里就把欢乐带到哪里，永远充满能量，永远停不下来。你享受的不只是速度本身——更是风掠过耳边时那种无拘无束的感觉。',tags:['快乐源泉','自由灵魂','停不下来','感染力MAX'],quote:'"Gotta go fast!" —— Sonic'},
+ENTJ:{icon:'🐉',name:'塞菲罗斯',from:'《最终幻想VII》',title:'绝对掌控 · 终极野心',desc:'你拥有塞菲罗斯般的强大气场和统治力。无论是公会管理还是团本战略，你都要做那个最终决策者。你有远大的目标，更有碾压一切的实力和不容置疑的魄力去实现它。',tags:['绝对领袖','战略视野','野心勃勃','实力碾压'],quote:'"我将不再只是一段记忆。" —— Sephiroth'},
+ENTP:{icon:'🃏',name:'Joker',from:'《女神异闻录5》',title:'反叛天才 · 规则破壁者',desc:'你就是Phantom Thieves的灵魂人物。热衷发现别人看不到的可能性，挑战一切"不可能"。你的思维天马行空，总能在意想不到的地方找到突破口——然后带着笑容把旧规则撕碎。',tags:['创新鬼才','规则破坏者','脑洞无限','出其不意'],quote:'"Show me your true form!" —— Joker'},
+ENFJ:{icon:'🗡️',name:'林克',from:'《塞尔达传说》',title:'沉默领袖 · 命运之勇者',desc:'你和林克一样，用行动而非言语来领导。你天生拥有感召他人的力量，在危难时刻总能团结所有人。勇气、智慧和力量——你不需要选择其一，因为三者都在你的血液里。',tags:['行动领袖','勇气化身','感召力强','使命驱动'],quote:'"……"（沉默中蕴含千言万语）—— Link'},
+ENFP:{icon:'🌟',name:'索拉',from:'《王国之心》',title:'光之守护者 · 永恒乐观',desc:'像索拉一样，你相信友情和光明能战胜一切黑暗。你永远充满好奇心和热情，每一段冒险对你来说都是全新的礼物。即使身处最深的黑暗——你的心，永远朝着光亮的方向。',tags:['永远乐观','好奇心爆棚','友情至上','光明信仰'],quote:'"My friends are my power!" —— Sora'},
+ISTJ:{icon:'🔫',name:'Snake',from:'《合金装备》',title:'沉默执行者 · 绝对专业',desc:'你就是Solid Snake——沉默、专业、使命必达。你不需要聚光灯，只需要一个明确的目标。你对细节的掌控力和超强的执行力，让每一次任务都完美无缺。你从不多说——因为行动已经说明了一切。',tags:['使命必达','极致专业','细节掌控','沉默可靠'],quote:'"Kept you waiting, huh?" —— Snake'},
+ISTP:{icon:'🐺',name:'独臂之狼',from:'《只狼：影逝二度》',title:'冷静刀锋 · 极致操作',desc:'你和狼一样，是冷静到极致的操作大师。不需要多余的社交，只专注于手中的刀刃。每一次弹反都精准致命，每一次闪避都恰到好处。人刀合一——这四个字就是你的全部人生信条。',tags:['操作天花板','极致专注','冷静致命','独行侠'],quote:'"死ぬ意味を知れ。" —— 只狼'},
+ISFJ:{icon:'👻',name:'路易吉',from:'《路易吉洋馆》',title:'胆小英雄 · 温柔守护者',desc:'你就是路易吉。不是万众瞩目的那个，但你的温柔和坚持是团队最珍贵的宝藏。你会害怕——膝盖会抖、手会颤——但你从不退缩。因为你知道，身后有你想守护的人。',tags:['温柔坚定','默默守护','低调英雄','靠谱后盾'],quote:'"Oh, Mama!" —— Luigi'},
+ISFP:{icon:'🎨',name:'天照',from:'《大神》',title:'笔触造物 · 诗意神灵',desc:'你就像天照大神——用画笔创造世界，用审美定义一切。游戏中的风景、光影、音乐和每一帧细腻的情感都能让你驻足良久。对你来说，游戏不只是战斗，更是一场心灵与审美的旅程。',tags:['审美至上','诗意灵魂','艺术创造','细腻感性'],quote:'"万物归于笔下。" —— 天照'},
+INTJ:{icon:'🧙',name:'杰洛特',from:'《巫师3》',title:'冷面猎魔人 · 灰色策略家',desc:'你是杰洛特式的冷静谋略者。不爱多说话，但每一个决定都经过深思熟虑。你不盲从任何阵营，只相信自己的判断。在这个非黑即白的世界里——你选择站在灰色地带，用智慧做出自己的回答。',tags:['冷面智者','独立判断','深谋远虑','灰色地带'],quote:'"如果必须在两害之间取其一，我宁可都不选。" —— 杰洛特'},
+INTP:{icon:'🔬',name:'山姆',from:'《死亡搁浅》',title:'连接者 · 底层解构者',desc:'你痴迷于理解一切的底层逻辑。就像山姆穿越死亡搁浅的世界，你在游戏深层系统中寻找联系与意义。别人在打Boss，你在拆解伤害公式。你是论坛最硬核的攻略作者——公式背后的数学家。',tags:['底层逻辑','系统思维','硬核研究','深度连接'],quote:'"Tomorrow is in your hands." —— Sam'},
+INFJ:{icon:'🌿',name:'旺达',from:'《旺达与巨像》',title:'使命殉道者 · 孤独理想主义',desc:'你和旺达一样，为了心中的执念可以对抗整个世界。你被游戏中宏大的世界观和悲壮的角色命运深深吸引。孤独的旅程从不令你退缩——因为你知道终点有值得用一切去守护的东西。',tags:['使命执着','孤独浪漫','剧情信仰','世界观沉迷'],quote:'"为了她，我愿意毁灭一切。" —— 旺达'},
+INFP:{icon:'🕳️',name:'小骑士',from:'《空洞骑士》',title:'虚空诗者 · 沉默旅人',desc:'你就是那个在圣巢深处独自漫游的小骑士。安静、坚韧、充满诗意。你不需要别人理解你的旅程——因为你在黑暗中找到了属于自己的微光。每一步都是一首无声的诗。',tags:['沉默坚韧','诗意灵魂','独行者','在黑暗中寻光'],quote:'"No cost too great." —— The Knight'}
+};
+
+const eggText={
+destiny:{throne:'你选择了"王座"——你骨子里是一个愿意为责任承担重量的人。皇冠很重，但你的脊椎更硬。',freedom:'你选择了"自由"——你比什么都珍视不被定义的权利。神位很高，但你的灵魂飞得更高。',balance:'你选择了"平衡"——你总能找到两全其美的方式。力量留给世界，自由留给自己——这是最优雅的答案。',rebel:'你选择了"反叛"——你拒绝一切二选一的假命题。真正的答案，永远在给定选项之外。'},
+save:{prepare:'存档时你想的是"准备"——你是一个注重万全之策的人。最后一战，你要的不是赢，而是——完美地赢。',story:'存档时你想的是"故事"——角色的命运牵动着你的心。对你来说，通关不是结束——而是一段关系的句号。',charge:'存档时你想的是"冲锋"——最难的Boss就是最好的Boss。你享受的不是胜利——而是战斗本身。',journey:'存档时你想的是"旅程"——你是一个重过程不重结果的人。不管前方是什么——你已经得到了最好的奖励。'}
+};
+
+let cur=0;const sc={E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};const ea={};
+
+!function(){const c=document.getElementById('stars');for(let i=0;i<45;i++){const s=document.createElement('div');s.className='star';const z=Math.random()*3+1;s.style.cssText=`width:${z}px;height:${z}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-duration:${Math.random()*3+2}s;animation-delay:${Math.random()*3}s`;c.appendChild(s)}}();
+
+function show(id,v){const el=document.getElementById(id);if(el)el.classList[v?'add':'remove']('on')}
+function go(){show('S0',false);show('S1',true);render()}
+
+function render(){
+  const q=Qs[cur],total=Qs.length;
+  document.getElementById('pF').style.width=(cur/total*100)+'%';
+  document.getElementById('pT').textContent=`${cur+1} / ${total}`;
+  const sa=document.getElementById('scA');
+  sa.innerHTML=q.scene?`<div class="scene"><div class="scene-from">📍 ${q.scene.from}</div><div class="scene-desc">${q.scene.desc}</div></div>`:'';
+  const b=document.getElementById('bdg');b.textContent=q.badge;b.className=q.isEgg?'badge egg':'badge';
+  const qt=document.getElementById('qT');qt.textContent=q.q;qt.style.animation='none';qt.offsetHeight;qt.style.animation='fu .4s';
+  document.getElementById('nrr').innerHTML=q.narrator||'';
+  const box=document.getElementById('opC');box.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const d=document.createElement('div');d.className='opt';
+    let tagHtml=o.tag?`<span class="skill-tag ${o.tc||'blue'}">${o.tag}</span>`:'';
+    d.innerHTML=`<div class="oi"><div class="opt-head"><span class="ol">${'ABCD'[i]}</span><span class="opt-title">${o.t}${tagHtml}</span></div>${o.f?`<div class="opt-flavor">${o.f}</div>`:''}</div>`;
+    d.onclick=()=>pick(d,o,q);box.appendChild(d);
+  });
+}
+
+function pick(el,o,q){
+  if(el.classList.contains('sel'))return;el.classList.add('sel');
+  if(q.isEgg){ea[q.eggId]=o.val}else{Object.entries(o.s).forEach(([k,v])=>sc[k]+=v)}
+  setTimeout(()=>{cur++;cur<Qs.length?render():result()},420);
+}
+
+function result(){
+  show('S1',false);show('S2',true);
+  const type=(sc.E>=sc.I?'E':'I')+(sc.S>=sc.N?'S':'N')+(sc.T>=sc.F?'T':'F')+(sc.J>=sc.P?'J':'P');
+  const r=R[type];
+  document.getElementById('rI').textContent=r.icon;
+  document.getElementById('rF').textContent='来自 '+r.from;
+  document.getElementById('rN').textContent=r.name;
+  document.getElementById('rT').textContent=r.title;
+  document.getElementById('rD').textContent=r.desc;
+  document.getElementById('rQ').textContent=r.quote;
+  const dims=[{l:'外向 E',r:'内向 I',lv:sc.E,rv:sc.I,c:'#6C5CE7'},{l:'感觉 S',r:'直觉 N',lv:sc.S,rv:sc.N,c:'#00CEC9'},{l:'思维 T',r:'情感 F',lv:sc.T,rv:sc.F,c:'#FD79A8'},{l:'判断 J',r:'感知 P',lv:sc.J,rv:sc.P,c:'#FDCB6E'}];
+  const dc=document.getElementById('rDm');dc.innerHTML='';
+  dims.forEach(d=>{const tot=d.lv+d.rv||1,pct=Math.round(d.lv/tot*100),win=d.lv>=d.rv?d.l:d.r;dc.innerHTML+=`<div class="rdim"><div class="dl">${d.l} / ${d.r}</div><div class="db"><div class="df" style="width:${pct}%;background:${d.c}"></div></div><div class="dr" style="color:${d.c}">${win} ${Math.max(pct,100-pct)}%</div></div>`});
+  const eaDiv=document.getElementById('eA');eaDiv.innerHTML='';
+  if(ea.destiny||ea.save){let h='<div class="egg-box"><div class="et">🥚 隐藏彩蛋解读</div><div class="eb">';if(ea.destiny)h+='<p style="margin-bottom:8px">'+eggText.destiny[ea.destiny]+'</p>';if(ea.save)h+='<p>'+eggText.save[ea.save]+'</p>';h+='</div></div>';eaDiv.innerHTML=h}
+  const tc=document.getElementById('rTg');tc.innerHTML='';r.tags.forEach(t=>{tc.innerHTML+=`<span>${t}</span>`});
+}
+
+function restart(){cur=0;Object.keys(sc).forEach(k=>sc[k]=0);ea.destiny=undefined;ea.save=undefined;show('S2',false);show('S1',false);show('S0',true);window.scrollTo(0,0)}
+
+function share(){
+  const type=(sc.E>=sc.I?'E':'I')+(sc.S>=sc.N?'S':'N')+(sc.T>=sc.F?'T':'F')+(sc.J>=sc.P?'J':'P');
+  const r=R[type];let txt=`🎮 我的游戏灵魂角色是【${r.icon} ${r.name}】\n来自${r.from}\n「${r.title}」\n\n${r.desc}\n\n${r.quote}`;
+  if(ea.destiny)txt+='\n\n🥚 '+eggText.destiny[ea.destiny];
+  txt+='\n\n快来测测你是哪个游戏角色 👉';
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast('已复制，快去分享！'))}
+  else{const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);toast('已复制，快去分享！')}
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+setTimeout(function(){
+  document.getElementById('btn-go').onclick = go;
+  document.getElementById('btn-restart').onclick = restart;
+  document.getElementById('btn-share').onclick = share;
+},0);
+})();
+</script>
+</body>
+</html>
