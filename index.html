@@ -353,7 +353,7 @@ destiny:{throne:'你选择了"王座"——你骨子里是一个愿意为责任�
 save:{prepare:'存档时你想的是"准备"——你是一个注重万全之策的人。最后一战，你要的不是赢，而是——完美地赢。',story:'存档时你想的是"故事"——角色的命运牵动着你的心。对你来说，通关不是结束——而是一段关系的句号。',charge:'存档时你想的是"冲锋"——最难的Boss就是最好的Boss。你享受的不是胜利——而是战斗本身。',journey:'存档时你想的是"旅程"——你是一个重过程不重结果的人。不管前方是什么——你已经得到了最好的奖励。'}
 };
 
-let cur=0;const sc={E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};const ea={};
+let cur=0,answerLocked=false;const sc={E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};const ea={};
 
 !function(){const c=document.getElementById('stars');for(let i=0;i<45;i++){const s=document.createElement('div');s.className='star';const z=Math.random()*3+1;s.style.cssText=`width:${z}px;height:${z}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-duration:${Math.random()*3+2}s;animation-delay:${Math.random()*3}s`;c.appendChild(s)}}();
 
@@ -361,6 +361,7 @@ function show(id,v){const el=document.getElementById(id);if(el)el.classList[v?'a
 function go(){show('S0',false);show('S1',true);render()}
 
 function render(){
+  answerLocked=false;
   const q=Qs[cur],total=Qs.length;
   document.getElementById('pF').style.width=(cur/total*100)+'%';
   document.getElementById('pT').textContent=`${cur+1} / ${total}`;
@@ -379,7 +380,7 @@ function render(){
 }
 
 function pick(el,o,q){
-  if(el.classList.contains('sel'))return;el.classList.add('sel');
+  if(answerLocked)return;answerLocked=true;el.classList.add('sel');
   if(q.isEgg){ea[q.eggId]=o.val}else{Object.entries(o.s).forEach(([k,v])=>sc[k]+=v)}
   setTimeout(()=>{cur++;cur<Qs.length?render():result()},420);
 }
@@ -402,15 +403,36 @@ function result(){
   const tc=document.getElementById('rTg');tc.innerHTML='';r.tags.forEach(t=>{tc.innerHTML+=`<span>${t}</span>`});
 }
 
-function restart(){cur=0;Object.keys(sc).forEach(k=>sc[k]=0);ea.destiny=undefined;ea.save=undefined;show('S2',false);show('S1',false);show('S0',true);window.scrollTo(0,0)}
+function restart(){cur=0;answerLocked=false;Object.keys(sc).forEach(k=>sc[k]=0);ea.destiny=undefined;ea.save=undefined;show('S2',false);show('S1',false);show('S0',true);window.scrollTo(0,0)}
 
 function share(){
   const type=(sc.E>=sc.I?'E':'I')+(sc.S>=sc.N?'S':'N')+(sc.T>=sc.F?'T':'F')+(sc.J>=sc.P?'J':'P');
   const r=R[type];let txt=`🎮 我的游戏灵魂角色是【${r.icon} ${r.name}】\n来自${r.from}\n「${r.title}」\n\n${r.desc}\n\n${r.quote}`;
   if(ea.destiny)txt+='\n\n🥚 '+eggText.destiny[ea.destiny];
-  txt+='\n\n快来测测你是哪个游戏角色 👉';
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>toast('已复制，快去分享！'))}
-  else{const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();document.execCommand('copy');document.body.removeChild(a);toast('已复制，快去分享！')}
+  txt+='\n\n快来测测你是哪个游戏角色 👉 https://guqu1.github.io/demo/';
+  function fallback(){
+    const a=document.createElement('textarea');a.value=txt;
+    a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);
+    a.select();a.setSelectionRange(0,a.value.length);
+    let copied=false;
+    try{copied=document.execCommand('copy')}catch(e){}
+    a.remove();
+    if(copied)toast('已复制，快去分享！');
+    else{
+      const manual=document.createElement('textarea');
+      manual.value=txt;manual.readOnly=true;
+      manual.style.cssText='position:fixed;inset:15% 5%;width:90%;height:60%;z-index:101;padding:16px;border:2px solid #6C5CE7;border-radius:14px;background:#16112A;color:#F5F5F7;font-size:14px';
+      const close=document.createElement('button');
+      close.textContent='关闭';close.className='ba p';
+      close.style.cssText='position:fixed;top:77%;left:35%;width:30%;z-index:101';
+      close.onclick=()=>{manual.remove();close.remove()};
+      document.body.append(manual,close);manual.focus();manual.select();
+      toast('复制失败，请手动复制');
+    }
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>toast('已复制，快去分享！')).catch(fallback);
+  }else fallback();
 }
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
 
